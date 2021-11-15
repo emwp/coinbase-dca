@@ -10,21 +10,21 @@ import (
 )
 
 type currencyConfig struct {
-	symbol     string
-	percentage int
+	Symbol     string
+	Percentage int
 }
 
-type config struct {
+type Config struct {
 	BaseUrl        string `env:"BASE_URL"`
 	Key            string `env:"KEY"`
 	Secret         string `env:"SECRET"`
 	Passphrase     string `env:"PASSPHRASE"`
 	Cron           string `env:"CRON"`
-	CurrencyConfig *[]currencyConfig
+	CurrencyConfig []currencyConfig
 }
 
-func GetEnvConfig() config {
-	config := config{
+func GetEnvConfig() Config {
+	config := Config{
 		BaseUrl:    os.Getenv("BASE_URL"),
 		Key:        os.Getenv("KEY"),
 		Secret:     os.Getenv("SECRET"),
@@ -45,19 +45,19 @@ func GetEnvConfig() config {
 			}
 
 			currencies = append(currencies, currencyConfig{
-				symbol:     currConfig[0],
-				percentage: percentage,
+				Symbol:     currConfig[0],
+				Percentage: percentage,
 			})
 		}
 		if len(currencies) != 0 {
-			config.CurrencyConfig = &currencies
+			config.CurrencyConfig = currencies
 		}
 	}
 
 	return config
 }
 
-func getCoinbaseClient(c config) *coinbasepro.Client {
+func getCoinbaseClient(c Config) *coinbasepro.Client {
 	client := coinbasepro.NewClient()
 	client.UpdateConfig(&coinbasepro.ClientConfig{
 		BaseURL:    c.BaseUrl,
