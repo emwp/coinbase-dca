@@ -5,7 +5,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/preichenberger/go-coinbasepro/v2"
 )
 
@@ -67,4 +69,50 @@ func getCoinbaseClient(c Config) *coinbasepro.Client {
 	})
 
 	return client
+}
+
+type SubscribeOptions struct {
+	Base   string
+	Target string
+}
+
+func SubscribeToCurrency(opts SubscribeOptions) {
+	var wsDialer = websocket.DefaultDialer
+	wsConn, _, err := wsDialer.Dial("wss://ws-feed.pro.coinbase.com", nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	subscribe := coinbasepro.Message{
+		Type: "subscribe",
+		Channels: []coinbasepro.MessageChannel{
+			{
+				Name: "ticker",
+				ProductIds: []string{
+					opts.Target + "-" + opts.Base,
+				},
+			},
+		},
+	}
+
+	if err := wsConn.WriteJSON(subscribe); err != nil {
+		println(err.Error())
+	}
+
+	for true {
+		message := coinbasepro.Message{}
+		if err := wsConn.ReadJSON(&message); err != nil {
+			println(err.Error())
+			break
+		}
+		if message.Type == "ticker" {
+			println("PRODUCT ID:", message.ProductID)
+			println("LAST:", message.LastSize)
+			println("PRICE: ", message.Price)
+			println("BEST BID: ", message.BestBid)
+			println()
+			time.Sleep(time.Second * 1)
+		}
+	}
 }

@@ -17,6 +17,8 @@ func main() {
 	config := utils.GetEnvConfig()
 	fmt.Println(config)
 
+	utils.SubscribeToCurrency(utils.SubscribeOptions{Base: "USD", Target: "ETH"})
+
 	// client := getCoinbaseClient(config)
 
 	// accounts, err := client.GetAccounts()
